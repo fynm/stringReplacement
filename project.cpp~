@@ -90,9 +90,11 @@
  				if(subtemp == targetWord){
  					subtemp = replaceWord;
  				}
+ 				/*If target word is before a comma*/
  				if(subtemp == targetWordComma){
  					subtemp = replaceWordComma;
  				}
+ 				/*If target word is before a period (end of sentence)*/
  				if(subtemp == targetWordPeriod){
  					subtemp = replaceWordPeriod;
  				}
@@ -108,84 +110,158 @@
  }
  
  
- void phraseChange(vector<string> &letter, string targetPhrase, string replacePhrase){
+void phraseChange(vector<string> &letter, string targetPhrase, string replacePhrase){
  	vector<string> newLetter;
- 	string targetPhraseComma = targetPhrase+",";
- 	string targetPhrasePeriod = targetPhrase+".";
- 	string replacePhraseComma = replacePhrase+",";
- 	string replacePhrasePeriod = replacePhrase+",";
+ 	bool candidate;
+ 	int hitCounter;
+ 	int phraseMatches;
+ 	string line;
+ 	string replaceLine;
+ 	string before;
+ 	string remaining;
+ 	int start;
+ 	int finish;
+ 	int index;
  	
- 	for(int x = 0; x < letter.size(); x++){
-	 	string temp = letter[x];
-	 	string subtemp;
-	 	string subtempComma = subtemp+",";
-	 	string subtempPeriod = subtemp+".";	 	
-	 	string subLine = temp;
-	 	
-	 	int end = targetPhrase.size();
-	 	int end2 = targetPhraseComma.size();
-	 	int remainder;
-	 	for(int i = 0; i<temp.size();i++){
-	 		subtemp = temp.substr(i,end+i);
-	 		remainder = temp.size()-(end+i);
-	 		if(subtemp == targetPhrase){
-	 			subLine.replace(subLine.begin()+i,subLine.end()-remainder, targetPhrase);
-	 			//cout<<temp.substr(0,i-1)<<endl;
-	 			cout<<subLine<<endl;
-	 			break;
+ 	hitCounter = 0;
+ 	phraseMatches = 0;
+
+ 	for(int k = 0; k < letter.size(); k++) {	//loop through the lines within the vector
+ 		line = letter[k];		//set variable line to be a string of the line entry
+
+	 	for(int i = 0; i < line.length(); i++){		//interate through the string, or current line
+	 		if(line[i] == targetPhrase[0]) {		//compare the character to the first letter in the target
+	 			candidate = true;					//first character matches --> candidate
+	 			hitCounter++;						//increment hit counter if match
+
+	 			for (int j = 1; j < targetPhrase.length(); j++) {	//if camdidate, check remaining characters
+	 				index = i + j;
+	 				if (line[index] == targetPhrase[j]) {		
+	 					candidate = true;		
+	 					hitCounter++;		//increment hit counter
+	 					if (hitCounter == targetPhrase.length()) {		//check if hit counter has reached target phrase length
+	 						hitCounter = 0;		//reset hit counter
+	 						phraseMatches++;	//increment phrase match
+
+	 						// Target Phrase Identified! -- Replace with Replacement Phrase!
+	 						start = i + targetPhrase.length(); // index after target phrase
+	 						finish = line.length();				// index of end of line
+	 						if(i == 0) {	//phrase is at the beginning of a line
+	 							replaceLine = replacePhrase + line.substr(start, finish);
+	 						} else {		//phrase is in the middle of a line
+	 							replaceLine = line.substr(0, i-1) + " " + replacePhrase + line.substr(start, finish);
+	 						}
+
+	 						letter[k] = replaceLine;	//replace line within original letter.
+	 						// Replacement complete
+
+	 						candidate = false;
+	 						break;		//break from loop, check remaining text file
+	 					} else {}
+	 				} else {		//if no match, break from candidate and check remaining string
+	 					candidate = false;
+	 					hitCounter = 0;
+	 					break;
+	 				}
+	 			}
+
+	 		} else {
+	 			candidate = false;
 	 		}
-	 		if(subtempComma == targetPhraseComma){
-	 			subLine = temp.substr(0,i-1) + replacePhraseComma + temp.substr(end2+i,temp.size());
-	 			break;
-	 		}
-	 		if(subtempPeriod == targetPhrasePeriod){
-	 			subLine = temp.substr(0,i-1) + replacePhrasePeriod + temp.substr(end2+i,temp.size());
-	 			break;
-	 		}
- 		}
- 		newLetter.push_back(subLine);
- 	}
- 	letter = newLetter;
+		} 
+	}
+	cout <<endl;
+	cout << "Phrase matches found and replaced: " << phraseMatches;
  }
  
  
+ /*Gets each word from the Adjective List and places it into a vector then sends one back randomly*/  
+ string getWord(){
+ 	/*Gets SystemTime and creates Srand function*/
+	time_t t;
+	time(&t);
+	srand((unsigned int) t);
+ 	
+ 	/*Parses through text file of single word Adjectives*/
+ 	string temp;
+ 	vector<string> adjList;
+ 	ifstream Adjfile;
+ 	Adjfile.open("AdjectiveList2.txt");
+ 	while(!Adjfile.eof()){
+ 		Adjfile >> temp;
+ 		adjList.push_back(temp);
+ 	}
+ 	Adjfile.close();
+ 	
+ 	/*Random Number*/
+ 	int totalAdj = adjList.size()-1;
+ 	int RandomNum = rand() % totalAdj;
+ 	
+ 	/*Returns a random cell of a vector containing all the Adjectives*/
+ 	return adjList[RandomNum];
+ }
  
- /*Gets each phrase from the Adjective List and places it into a vector*/ 
- vector<string> getPhrase(){
-	int phraseCounter = 0;
+ 
+ /*Gets each phrase from the Adjective List and places it into a vector then sends one back randomly */ 
+ string getPhrase(){
+	/*Gets SystemTime and creates Srand function*/
+	time_t t;
+	time(&t);
+	srand((unsigned int) t);
+	
 	vector<string> phrase;
  	ifstream phraseFile;
  	phraseFile.open("AdjectiveList1.txt");
  	string line;
  	while(getline(phraseFile, line)){
- 		istringstream iss(line);
  		phrase.push_back(line);
  	}
  	phraseFile.close();
- 	return phrase;
+ 	
+ 	/*Random Number*/
+ 	int totalAdj = phrase.size()-1;
+ 	int randNum = rand() % totalAdj;
+ 	
+ 	return phrase[randNum];
  }
  
+ /*Gets text file in a vector line by line*/
+ vector<string> getTextLine(){
+ 	vector<string> letter;
+ 	ifstream file;
+ 	string line;
+ 	file.open("Mercurial1.txt");
+ 	while(getline(file,line)){
+ 		letter.push_back(line);
+ 		cout<<line<<endl;
+ 	}
+ 	cout<<endl;
+ 	file.close();
+ 	
+ 	return letter;
+ }
+ 
+/*ENCODE AND DECODE HERE*/
+ 
+ void saveFile(){
+ }
  
  /*Main Code to run System*/
  int main(int argc, char** argv){
  	
- 	vector<string> letter;
- 	vector<string> phraseList;
- 	vector<string> adjList;
- 	string temp;
+ 	vector<string> letter = getTextLine();
+
  	int nameReplace = 0;
  	int wordReplace = 0;
  	int phraseReplace = 0;
- 	int hideMessage = 0;
+ 	int hiddenMessage = 0;
  	string choice;
- 	/*Gets SystemTime and creates Srand function*/
-	time_t t;
-	time(&t);
-	srand((unsigned int) t);
+ 	
+
 
  	/*Choice of Action*/
  	while(true){
-	 	cout<<"Please choose what you want to replace or do: name, adjective, phrase, hide"<<endl;
+	 	cout<<"Please choose what you want to replace or do: name, adjective, phrase, hidden"<<endl;
 	 	cin >> choice;
 	 	if(choice == "name"){
 	 		nameReplace = 1;
@@ -196,24 +272,15 @@
 	 	}else if(choice == "phrase"){
 	 		phraseReplace = 1;
 	 		break;
-	 	}else if(choice == "hide"){
-	 		hideMessage = 1;
+	 	}else if(choice == "hidden"){
+	 		hiddenMessage = 1;
 	 		break;
 	 	}else{
 	 		cout<<"That is not the correct choice, Try again"<<endl;
 	 	}
  	}
  	
-	/*Converts Textfile to a Vector*/
- 	ifstream file;
- 	string line;
- 	file.open("Mercurial1.txt");
- 	while(getline(file,line)){
- 		letter.push_back(line);
- 		//cout<<line<<endl;
- 	}
- 	cout<<endl;
- 	file.close();
+
  	
  	/*Name Replacement*/
  	if(nameReplace!=0){
@@ -235,7 +302,7 @@
 	
 		/*New List*/
 		for(int i = 0; i < letter.size(); i++){
-			cout<<letter[i]<<endl;
+		getPhrase();	cout<<letter[i]<<endl;
 		} 
 	 	cout<<endl;
  	}
@@ -244,22 +311,10 @@
  	
  	/*Adjective Replacement*/
  	if(wordReplace != 0){
-	 	ifstream Adjfile;
-	 	Adjfile.open("AdjectiveList2.txt");
-	 	while(!Adjfile.eof()){
-	 		Adjfile >> temp;
-	 		adjList.push_back(temp);
-	 	}
-	 	Adjfile.close();	
-	 		
  		string targetWord;
- 		string replaceWord;
- 		/*Random Number*/
- 		int totalAdj = adjList.size()-1;
- 		int RandomNum = rand() % totalAdj;
+ 		string replaceWord = getWord();
  		cout<<"Please input the word you want to replace"<<endl;
  		cin >> targetWord;
- 		replaceWord = adjList[RandomNum];
  		cout<<"The replacement word is "<<replaceWord<<endl;
  		wordChange(letter, targetWord, replaceWord);
  		
@@ -274,25 +329,48 @@
  	
  	/*Phrase Replacement*/
  	if(phraseReplace != 0){
- 		vector<string> phrase = getPhrase();
  		string targetPhrase;
  		string replacePhrase;
- 		int totalAdj = phrase.size()-1;
- 		int randNum = rand() % totalAdj;
  		cout<<"Please input the Phrase you want to replace."<<endl;
- 		cin >> targetPhrase;
- 		replacePhrase = phrase[randNum];
+ 		cin.ignore(); //ignores spaces
+ 		getline(cin, targetPhrase); //gets target phrase to replace
+ 		replacePhrase = getPhrase();
  		cout<<"The replacement Phrase is: "<<replacePhrase<<endl;
 		phraseChange(letter, targetPhrase, replacePhrase); 	
- 		/*Print Out New Letter
+ 		
+ 		/*Print Out New Letter*/
  		for(int i = 0; i < letter.size(); i++){
 			cout<<letter[i]<<endl;
 		} 
-	 	cout<<endl;*/
+	 	cout<<endl;
  	}
  	
  	
- 	
+ 	/*Hidden Message Encode/Decode*/
+ 	if(hiddenMessage != 0){
+ 		string ende;
+ 		while(true){
+	 		cout<<"Do you want to 'encode' or 'decode' a message?"<<endl;
+	 		cin >> ende;
+	 		if(ende == "encode"){
+	 			//encode();
+	 			break;
+	 		}else if(ende == "decode"){
+	 			//decode();
+	 			break;
+	 		}else{
+	 			cout<<"Thats not a correct input, try again"<<endl;
+	 		}
+ 		}
+ 		
+ 		
+ 		/*Print Out New Letter*/
+ 		for(int i = 0; i < letter.size(); i++){
+			cout<<letter[i]<<endl;
+		} 
+	 	cout<<endl;
+	 	
+ 	}
  	
  	
  	
