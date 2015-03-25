@@ -241,7 +241,7 @@ void phraseChange(vector<string> &letter, string targetPhrase, string replacePhr
  	return letter;
  }
  
-/*ENCODE AND DECODE HERE*/
+/*ENCODE AND DECODE HERE JIGAR*/
  
  void saveFile(){
  }

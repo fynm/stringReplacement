@@ -373,9 +373,21 @@ void phraseChange(vector<string> &letter, string targetPhrase, string replacePhr
  	}
  	
  	
+ 	string save;
+ 	cout<<"Would you like to save the file? (y/n)"<<endl;
+ 	cin >> save;
+ 	while(true){
+	 	if(save == "y"){
+	 		//save file
+	 		break;
+	 	}else if(save == "n"){
+	 		//dont save
+	 		break;
+	 	}else{
+	 		cout<<"Please input 'y' or 'n'"<<endl;
+	 	}
+ 	}
  	
  	
- 	
- 			
  	return 0;
  }
